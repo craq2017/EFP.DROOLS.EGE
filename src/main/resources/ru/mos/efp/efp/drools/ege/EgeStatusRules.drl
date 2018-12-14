@@ -1,0 +1,20 @@
+package ru.mos.efp.efp.drools.ege;
+
+
+rule "Check status XML"
+	when
+		$app : XmlStatus( xml == null || xml==""  )
+		$error : Errors( )
+	then
+		$error.addError("INTERNAL_ERRORS", new Error("XML_IS_NULL", "Xml is null or empty")); 
+end
+
+rule "Init status XML Service"
+    when
+        $app: XmlStatus(xml!=null && xml!="")
+    then
+        insert(new XmlService($app.getXml()));
+        insert(new XmlStatusOk());
+end
+
+

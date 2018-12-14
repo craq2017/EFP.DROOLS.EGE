@@ -1,0 +1,759 @@
+package ru.mos.efp.efp.drools.ege;
+
+
+rule "Check XML"
+	when
+		$app : XmlApplication( xml == null || xml==""  )
+		$error : Errors( )
+	then
+		$error.addError("INTERNAL_ERRORS", new Error("XML_IS_NULL", "Xml is null or empty")); 
+end
+
+rule "Init XML Service"
+    when
+        $app: XmlApplication(xml!=null && xml!="")
+    then
+        insert(new XmlService($app.getXml()));
+        insert(new XmlApplicationOk());
+end
+
+rule "Check passport series"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20001]/DocSerie)") != 0  &&
+	        this not matches "^[0-9]{4}$") from $xml.xpathString("//IdentityDocument[DocCode=20001]/DocSerie")
+        $error : Errors( )
+    then 
+        $error.addError("PASSPORT_ERROR", new Error("PASSPORT_SERIES_WRONG_FORMAT", "Passport series wrong format")); 
+end
+
+rule "Check passport number"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20001]/DocNumber)") != 0  &&
+	        this not matches "^[0-9]{6}$") from $xml.xpathString("//IdentityDocument[DocCode=20001]/DocNumber")
+        $error : Errors( )
+    then 
+        $error.addError("PASSPORT_ERROR", new Error("PASSPORT_NUMBER_WRONG_FORMAT", "Passport number wrong format")); 
+end
+
+rule "Check passport doc date"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20001]/DocDate)") != 0  &&
+	        this not matches "^[0-9\\.-]+$") from $xml.xpathString("//IdentityDocument[DocCode=20001]/DocDate")
+        $error : Errors( )
+    then 
+        $error.addError("PASSPORT_ERROR", new Error("PASSPORT_DOC_DATE_WRONG_FORMAT", "Passport doc date wrong format")); 
+end
+
+rule "Check passport who sign"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20001]/WhoSign)") != 0  &&
+	        this not matches "^.{1,250}$") from $xml.xpathString("//IdentityDocument[DocCode=20001]/WhoSign")
+        $error : Errors( )
+    then 
+        $error.addError("PASSPORT_ERROR", new Error("PASSPORT_WHO_SIGN_WRONG_FORMAT", "Passport who sign wrong format")); 
+end
+
+rule "Check passport divison code"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20001]/DivisionCode)") != 0  &&
+	        this not matches "^[0-9]{3}-[0-9]{3}$") from $xml.xpathString("//IdentityDocument[DocCode=20001]/DivisionCode")
+        $error : Errors( )
+    then 
+        $error.addError("PASSPORT_ERROR", new Error("PASSPORT_DIVISION_CODE_WRONG_FORMAT", "Passport division code wrong format")); 
+end
+
+rule "Check foreign passport series"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20005]/DocSerie)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=20005]/DocSerie")
+        $error : Errors( )
+    then 
+        $error.addError("FOREIGN_PASSPORT_ERROR", new Error("FOREIGN_PASSPORT_SERIES_WRONG_FORMAT", "Foreign passport series wrong format")); 
+end
+
+rule "Check foreign passport number"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20005]/DocNumber)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=20005]/DocNumber")
+        $error : Errors( )
+    then 
+        $error.addError("FOREIGN_PASSPORT_ERROR", new Error("FOREIGN_PASSPORT_NUMBER_WRONG_FORMAT", "Foreign passport number wrong format")); 
+end
+
+rule "Check foreign passport doc date"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20005]/DocDate)") != 0  &&
+	        this not matches "^[0-9\\.-]+$") from $xml.xpathString("//IdentityDocument[DocCode=20005]/DocDate")
+        $error : Errors( )
+    then 
+        $error.addError("FOREIGN_PASSPORT_ERROR", new Error("FOREIGN_PASSPORT_DOC_DATE_WRONG_FORMAT", "Foreign passport doc date wrong format")); 
+end
+
+rule "Check foreign passport who sign"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20005]/WhoSign)") != 0  &&
+	        this not matches "^.{1,250}$") from $xml.xpathString("//IdentityDocument[DocCode=20005]/WhoSign")
+        $error : Errors( )
+    then 
+        $error.addError("FOREIGN_PASSPORT_ERROR", new Error("FOREIGN_PASSPORT_WHO_SIGN_WRONG_FORMAT", "Foreign passport who sign wrong format")); 
+end
+
+
+rule "Check residence permit series"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20007]/DocSerie)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=20007]/DocSerie")
+        $error : Errors( )
+    then 
+        $error.addError("RESIDENCE_PERMIT_ERROR", new Error("RESIDENCE_PERMIT_SERIES_WRONG_FORMAT", "Residence permit series wrong format")); 
+end
+
+rule "Check residence permit number"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20007]/DocNumber)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=20007]/DocNumber")
+        $error : Errors( )
+    then 
+        $error.addError("RESIDENCE_PERMIT_ERROR", new Error("RESIDENCE_PERMIT_NUMBER_WRONG_FORMAT", "Residence permit number wrong format")); 
+end
+
+rule "Check residence permit doc date"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20007]/DocDate)") != 0  &&
+	        this not matches "^[0-9\\.-]+$") from $xml.xpathString("//IdentityDocument[DocCode=20007]/DocDate")
+        $error : Errors( )
+    then 
+        $error.addError("RESIDENCE_PERMIT_ERROR", new Error("RESIDENCE_PERMIT_DOC_DATE_WRONG_FORMAT", "Residence permit doc date wrong format")); 
+end
+
+rule "Check residence permit who sign"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20007]/WhoSign)") != 0  &&
+	        this not matches "^.{1,250}$") from $xml.xpathString("//IdentityDocument[DocCode=20007]/WhoSign")
+        $error : Errors( )
+    then 
+        $error.addError("RESIDENCE_PERMIT_ERROR", new Error("FOREIGN_PASSPORT_WHO_SIGN_WRONG_FORMAT", "Foreign passport who sign wrong format")); 
+end
+
+rule "Check refugees identity series"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20008]/DocSerie)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=20008]/DocSerie")
+        $error : Errors( )
+    then 
+        $error.addError("REFUGEES_IDENTITY_ERROR", new Error("REFUGEES_IDENTITY_SERIES_WRONG_FORMAT", "Refugees identity series wrong format")); 
+end
+
+rule "Check refugees identity number"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20008]/DocNumber)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=20008]/DocNumber")
+        $error : Errors( )
+    then 
+        $error.addError("REFUGEES_IDENTITY_ERROR", new Error("REFUGEES_IDENTITY_NUMBER_WRONG_FORMAT", "Refugees identity number wrong format")); 
+end
+
+rule "Check refugees identity doc date"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20008]/DocDate)") != 0  &&
+	        this not matches "^[0-9\\.-]+$") from $xml.xpathString("//IdentityDocument[DocCode=20008]/DocDate")
+        $error : Errors( )
+    then 
+        $error.addError("REFUGEES_IDENTITY_ERROR", new Error("REFUGEES_IDENTITY_DOC_DATE_WRONG_FORMAT", "Refugees identity doc date wrong format")); 
+end
+
+rule "Check refugees identity who sign"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20008]/WhoSign)") != 0  &&
+	        this not matches "^.{1,250}$") from $xml.xpathString("//IdentityDocument[DocCode=20008]/WhoSign")
+        $error : Errors( )
+    then 
+        $error.addError("REFUGEES_IDENTITY_ERROR", new Error("REFUGEES_IDENTITY_WHO_SIGN_WRONG_FORMAT", "Refugees identity who sign wrong format")); 
+end
+
+rule "Check temporary identity series"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20010]/DocSerie)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=20010]/DocSerie")
+        $error : Errors( )
+    then 
+        $error.addError("TEMPORARY_IDENTITY_ERROR", new Error("TEMPORARY_IDENTITY_SERIES_WRONG_FORMAT", "Temporary identity series wrong format")); 
+end
+
+rule "Check temporary identity number"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20010]/DocNumber)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=20010]/DocNumber")
+        $error : Errors( )
+    then 
+        $error.addError("TEMPORARY_IDENTITY_ERROR", new Error("TEMPORARY_IDENTITY_NUMBER_WRONG_FORMAT", "Temporary identity number wrong format")); 
+end
+
+rule "Check temporary identity doc date"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20010]/DocDate)") != 0  &&
+	        this not matches "^[0-9\\.-]+$") from $xml.xpathString("//IdentityDocument[DocCode=20010]/DocDate")
+        $error : Errors( )
+    then 
+        $error.addError("TEMPORARY_IDENTITY_ERROR", new Error("TEMPORARY_IDENTITY_DOC_DATE_WRONG_FORMAT", "Temporary identity doc date wrong format")); 
+end
+
+rule "Check temporary identity who sign"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20010]/WhoSign)") != 0  &&
+	        this not matches "^.{1,250}$") from $xml.xpathString("//IdentityDocument[DocCode=20010]/WhoSign")
+        $error : Errors( )
+    then 
+        $error.addError("TEMPORARY_IDENTITY_ERROR", new Error("TEMPORARY_IDENTITY_WHO_SIGN_WRONG_FORMAT", "Temporary identity who sign wrong format")); 
+end
+
+rule "Check temporary residence permit series"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20011]/DocSerie)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=20011]/DocSerie")
+        $error : Errors( )
+    then 
+        $error.addError("TEMPORARY_RESIDENCE_PERMIT_ERROR", new Error("TEMPORARY_RESIDENCE_PERMIT_SERIES_WRONG_FORMAT", "Temporary residence permit series wrong format")); 
+end
+
+rule "Check temporary residence permit number"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20011]/DocNumber)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=20011]/DocNumber")
+        $error : Errors( )
+    then 
+        $error.addError("TEMPORARY_RESIDENCE_PERMIT_ERROR", new Error("TEMPORARY_RESIDENCE_PERMIT_NUMBER_WRONG_FORMAT", "Temporary residence permit number wrong format")); 
+end
+
+rule "Check temporary residence permit doc date"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20011]/DocDate)") != 0  &&
+	        this not matches "^[0-9\\.-]+$") from $xml.xpathString("//IdentityDocument[DocCode=20011]/DocDate")
+        $error : Errors( )
+    then 
+        $error.addError("TEMPORARY_RESIDENCE_PERMIT_ERROR", new Error("TEMPORARY_RESIDENCE_PERMIT_DOC_DATE_WRONG_FORMAT", "Temporary residence permit doc date wrong format")); 
+end
+
+rule "Check temporary residence permit identity who sign"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20011]/WhoSign)") != 0  &&
+	        this not matches "^.{1,250}$") from $xml.xpathString("//IdentityDocument[DocCode=20011]/WhoSign")
+        $error : Errors( )
+    then 
+        $error.addError("TEMPORARY_RESIDENCE_PERMIT_ERROR", new Error("TEMPORARY_RESIDENCE_PERMIT_WHO_SIGN_WRONG_FORMAT", "Temporary residence permit who sign wrong format")); 
+end
+
+rule "Check stateless identity series"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20012]/DocSerie)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=20012]/DocSerie")
+        $error : Errors( )
+    then 
+        $error.addError("STATELESS_IDENTITY_ERROR", new Error("STATELESS_IDENTITY_SERIES_WRONG_FORMAT", "Stateless identity series wrong format")); 
+end
+
+rule "Check stateless identity number"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20012]/DocNumber)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=20012]/DocNumber")
+        $error : Errors( )
+    then 
+        $error.addError("STATELESS_IDENTITY_ERROR", new Error("STATELESS_IDENTITY_NUMBER_WRONG_FORMAT", "Stateless identity number wrong format")); 
+end
+
+rule "Check stateless identity doc date"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20012]/DocDate)") != 0  &&
+	        this not matches "^[0-9\\.-]+$") from $xml.xpathString("//IdentityDocument[DocCode=20012]/DocDate")
+        $error : Errors( )
+    then 
+        $error.addError("STATELESS_IDENTITY_ERROR", new Error("STATELESS_IDENTITY_DOC_DATE_WRONG_FORMAT", "Stateless identity doc date wrong format")); 
+end
+
+rule "Check stateless identity who sign"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20012]/WhoSign)") != 0  &&
+	        this not matches "^.{1,250}$") from $xml.xpathString("//IdentityDocument[DocCode=20012]/WhoSign")
+        $error : Errors( )
+    then 
+        $error.addError("STATELESS_IDENTITY_ERROR", new Error("STATELESS_IDENTITY_WHO_SIGN_WRONG_FORMAT", "Stateless identity who sign wrong format")); 
+end
+
+rule "Check immigrant application series"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20009]/DocSerie)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=20009]/DocSerie")
+        $error : Errors( )
+    then 
+        $error.addError("IMMIGRANT_APPLICATION_ERROR", new Error("IMMIGRANT_APPLICATION_SERIES_WRONG_FORMAT", "Immigrant application series wrong format")); 
+end
+
+rule "Check immigrant application number"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20009]/DocNumber)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=20009]/DocNumber")
+        $error : Errors( )
+    then 
+        $error.addError("IMMIGRANT_APPLICATION_ERROR", new Error("IMMIGRANT_APPLICATION_NUMBER_WRONG_FORMAT", "Immigrant application number wrong format")); 
+end
+
+rule "Check immigrant application doc date"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20009]/DocDate)") != 0  &&
+	        this not matches "^[0-9\\.-]+$") from $xml.xpathString("//IdentityDocument[DocCode=20009]/DocDate")
+        $error : Errors( )
+    then 
+        $error.addError("IMMIGRANT_APPLICATION_ERROR", new Error("IMMIGRANT_APPLICATION_DOC_DATE_WRONG_FORMAT", "Immigrant application doc date wrong format")); 
+end
+
+rule "Check immigrant application who sign"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20009]/WhoSign)") != 0  &&
+	        this not matches "^.{1,250}$") from $xml.xpathString("//IdentityDocument[DocCode=20009]/WhoSign")
+        $error : Errors( )
+    then 
+        $error.addError("IMMIGRANT_APPLICATION_ERROR", new Error("IMMIGRANT_APPLICATION_WHO_SIGN_WRONG_FORMAT", "Immigrant application who sign wrong format")); 
+end
+
+rule "Check international passport series"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20014]/DocSerie)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=20014]/DocSerie")
+        $error : Errors( )
+    then 
+        $error.addError("INTERNATIONAL_PASSPORT_ERROR", new Error("INTERNATIONAL_PASSPORT_SERIES_WRONG_FORMAT", "International passport series wrong format")); 
+end
+
+rule "Check international passport number"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20014]/DocNumber)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=20014]/DocNumber")
+        $error : Errors( )
+    then 
+        $error.addError("INTERNATIONAL_PASSPORT_ERROR", new Error("INTERNATIONAL_PASSPORT_NUMBER_WRONG_FORMAT", "International passport number wrong format")); 
+end
+
+rule "Check international passport doc date"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20014]/DocDate)") != 0  &&
+	        this not matches "^[0-9\\.-]+$") from $xml.xpathString("//IdentityDocument[DocCode=20014]/DocDate")
+        $error : Errors( )
+    then 
+        $error.addError("INTERNATIONAL_PASSPORT_ERROR", new Error("INTERNATIONAL_PASSPORT_DOC_DATE_WRONG_FORMAT", "International passport doc date wrong format")); 
+end
+
+rule "Check international passport who sign"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20014]/WhoSign)") != 0  &&
+	        this not matches "^.{1,250}$") from $xml.xpathString("//IdentityDocument[DocCode=20014]/WhoSign")
+        $error : Errors( )
+    then 
+        $error.addError("INTERNATIONAL_PASSPORT_ERROR", new Error("INTERNATIONAL_PASSPORT_WHO_SIGN_WRONG_FORMAT", "International passport who sign wrong format")); 
+end
+
+rule "Check military identification card series"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20019]/DocSerie)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=20019]/DocSerie")
+        $error : Errors( )
+    then 
+        $error.addError("MILITARY_IDENTIFICATION_CARD_ERROR", new Error("MILITARY_IDENTIFICATION_CARD_SERIES_WRONG_FORMAT", "Military identification series wrong format")); 
+end
+
+rule "Check military identification card number"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20019]/DocNumber)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=20019]/DocNumber")
+        $error : Errors( )
+    then 
+        $error.addError("MILITARY_IDENTIFICATION_CARD_ERROR", new Error("MILITARY_IDENTIFICATION_CARD_NUMBER_WRONG_FORMAT", "Military identification number wrong format")); 
+end
+
+rule "Check military identification card doc date"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20019]/DocDate)") != 0  &&
+	        this not matches "^[0-9\\.-]+$") from $xml.xpathString("//IdentityDocument[DocCode=20019]/DocDate")
+        $error : Errors( )
+    then 
+        $error.addError("MILITARY_IDENTIFICATION_CARD_ERROR", new Error("MILITARY_IDENTIFICATION_CARD_DOC_DATE_WRONG_FORMAT", "Military identification doc date wrong format")); 
+end
+
+rule "Check military identification card who sign"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20019]/WhoSign)") != 0  &&
+	        this not matches "^.{1,250}$") from $xml.xpathString("//IdentityDocument[DocCode=20019]/WhoSign")
+        $error : Errors( )
+    then 
+        $error.addError("MILITARY_IDENTIFICATION_CARD_ERROR", new Error("MILITARY_IDENTIFICATION_CARD_WHO_SIGN_WRONG_FORMAT", "Military identification who sign wrong format")); 
+end
+
+rule "Check diplomatic passport series"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=14596]/DocSerie)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=14596]/DocSerie")
+        $error : Errors( )
+    then 
+        $error.addError("DIPLOMATIC_PASSPORT_ERROR", new Error("DIPLOMATIC_PASSPORT_SERIES_WRONG_FORMAT", "Diplomatic passport series wrong format")); 
+end
+
+rule "Check diplomatic passport number"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=14596]/DocNumber)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=14596]/DocNumber")
+        $error : Errors( )
+    then 
+        $error.addError("DIPLOMATIC_PASSPORT_ERROR", new Error("DIPLOMATIC_PASSPORT_NUMBER_WRONG_FORMAT", "Diplomatic passport number wrong format")); 
+end
+
+rule "Check diplomatic passport doc date"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=14596]/DocDate)") != 0  &&
+	        this not matches "^[0-9\\.-]+$") from $xml.xpathString("//IdentityDocument[DocCode=14596]/DocDate")
+        $error : Errors( )
+    then 
+        $error.addError("DIPLOMATIC_PASSPORT_ERROR", new Error("DIPLOMATIC_PASSPORT_DOC_DATE_WRONG_FORMAT", "Diplomatic passport doc date wrong format")); 
+end
+
+rule "Check diplomatic passport who sign"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=14596]/WhoSign)") != 0  &&
+	        this not matches "^.{1,250}$") from $xml.xpathString("//IdentityDocument[DocCode=14596]/WhoSign")
+        $error : Errors( )
+    then 
+        $error.addError("DIPLOMATIC_PASSPORT_ERROR", new Error("DIPLOMATIC_PASSPORT_WHO_SIGN_WRONG_FORMAT", "Diplomatic passport who sign wrong format")); 
+end
+
+rule "Check service passport series"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=14597]/DocSerie)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=14597]/DocSerie")
+        $error : Errors( )
+    then 
+        $error.addError("SERVICE_PASSPORT_ERROR", new Error("SERVICE_PASSPORT_SERIES_WRONG_FORMAT", "Service passport series wrong format")); 
+end
+
+rule "Check service passport number"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=14597]/DocNumber)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=14597]/DocNumber")
+        $error : Errors( )
+    then 
+        $error.addError("SERVICE_PASSPORT_ERROR", new Error("SERVICE_PASSPORT_NUMBER_WRONG_FORMAT", "Service passport number wrong format")); 
+end
+
+rule "Check service passport doc date"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=14597]/DocDate)") != 0  &&
+	        this not matches "^[0-9\\.-]+$") from $xml.xpathString("//IdentityDocument[DocCode=14597]/DocDate")
+        $error : Errors( )
+    then 
+        $error.addError("SERVICE_PASSPORT_ERROR", new Error("SERVICE_PASSPORT_DOC_DATE_WRONG_FORMAT", "Service passport doc date wrong format")); 
+end
+
+rule "Check service passport who sign"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=14597]/WhoSign)") != 0  &&
+	        this not matches "^.{1,250}$") from $xml.xpathString("//IdentityDocument[DocCode=14597]/WhoSign")
+        $error : Errors( )
+    then 
+        $error.addError("SERVICE_PASSPORT_ERROR", new Error("SERVICE_PASSPORT_WHO_SIGN_WRONG_FORMAT", "Service passport who sign wrong format")); 
+end
+
+rule "Check period identity document series"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=14598]/DocSerie)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=14598]/DocSerie")
+        $error : Errors( )
+    then 
+        $error.addError("PERIOD_IDENTITY_DOCUMENT_ERROR", new Error("PERIOD_IDENTITY_DOCUMENT_SERIES_WRONG_FORMAT", "Period identity document series wrong format")); 
+end
+
+rule "Check period identity document number"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=14598]/DocNumber)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=14598]/DocNumber")
+        $error : Errors( )
+    then 
+        $error.addError("PERIOD_IDENTITY_DOCUMENT_ERROR", new Error("PERIOD_IDENTITY_DOCUMENT_NUMBER_WRONG_FORMAT", "Period identity document number wrong format")); 
+end
+
+rule "Check period identity document doc date"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=14598]/DocDate)") != 0  &&
+	        this not matches "^[0-9\\.-]+$") from $xml.xpathString("//IdentityDocument[DocCode=14598]/DocDate")
+        $error : Errors( )
+    then 
+        $error.addError("PERIOD_IDENTITY_DOCUMENT_ERROR", new Error("PERIOD_IDENTITY_DOCUMENT_DOC_DATE_WRONG_FORMAT", "Period identity document doc date wrong format")); 
+end
+
+rule "Check period identity document who sign"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=14598]/WhoSign)") != 0  &&
+	        this not matches "^.{1,250}$") from $xml.xpathString("//IdentityDocument[DocCode=14598]/WhoSign")
+        $error : Errors( )
+    then 
+        $error.addError("PERIOD_IDENTITY_DOCUMENT_ERROR", new Error("PERIOD_IDENTITY_DOCUMENT_WHO_SIGN_WRONG_FORMAT", "Period identity document who sign wrong format")); 
+end
+
+rule "Check temporary grating certificate series"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=14599]/DocSerie)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=14599]/DocSerie")
+        $error : Errors( )
+    then 
+        $error.addError("TEMPORARY_GRATING_SERTIFICATE_ERROR", new Error("TEMPORARY_GRATING_SERTIFICATE_SERIES_WRONG_FORMAT", "Temporary grating certificate series wrong format")); 
+end
+
+rule "Check temporary grating certificate number"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=14599]/DocNumber)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=14599]/DocNumber")
+        $error : Errors( )
+    then 
+        $error.addError("TEMPORARY_GRATING_SERTIFICATE_ERROR", new Error("TEMPORARY_GRATING_SERTIFICATE_NUMBER_WRONG_FORMAT", "Temporary grating certificate number wrong format")); 
+end
+
+rule "Check temporary grating certificate doc date"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=14599]/DocDate)") != 0  &&
+	        this not matches "^[0-9\\.-]+$") from $xml.xpathString("//IdentityDocument[DocCode=14599]/DocDate")
+        $error : Errors( )
+    then 
+        $error.addError("TEMPORARY_GRATING_SERTIFICATE_ERROR", new Error("TEMPORARY_GRATING_SERTIFICATE_DOC_DATE_WRONG_FORMAT", "Temporary grating certificate doc date wrong format")); 
+end
+
+rule "Check temporary grating certificate who sign"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=14599]/WhoSign)") != 0  &&
+	        this not matches "^.{1,250}$") from $xml.xpathString("//IdentityDocument[DocCode=14599]/WhoSign")
+        $error : Errors( )
+    then 
+        $error.addError("TEMPORARY_GRATING_SERTIFICATE_ERROR", new Error("TEMPORARY_GRATING_SERTIFICATE_WHO_SIGN_WRONG_FORMAT", "Temporary grating certificate who sign wrong format")); 
+end
+
+rule "Check military card series"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20002]/DocSerie)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=20002]/DocSerie")
+        $error : Errors( )
+    then 
+        $error.addError("MILITARY_CARD_ERROR", new Error("MILITARY_CARD_SERIES_WRONG_FORMAT", "Military card series wrong format")); 
+end
+
+rule "Check military card number"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20002]/DocNumber)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=20002]/DocNumber")
+        $error : Errors( )
+    then 
+        $error.addError("MILITARY_CARD_ERROR", new Error("MILITARY_CARD_NUMBER_WRONG_FORMAT", "Military card number wrong format")); 
+end
+
+rule "Check oficer identity card series"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20003]/DocSerie)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=20003]/DocSerie")
+        $error : Errors( )
+    then 
+        $error.addError("OFICER_IDENTITY_CARD_ERROR", new Error("OFICER_IDENTITY_CARD_SERIES_WRONG_FORMAT", "Oficer identity card series wrong format")); 
+end
+
+rule "Check oficer identity card number"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20003]/DocNumber)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=20003]/DocNumber")
+        $error : Errors( )
+    then 
+        $error.addError("OFICER_IDENTITY_CARD_ERROR", new Error("OFICER_IDENTITY_CARD_NUMBER_WRONG_FORMAT", "Oficer identity card number wrong format")); 
+end
+
+
+rule "Check seaman passport series"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20006]/DocSerie)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=20006]/DocSerie")
+        $error : Errors( )
+    then 
+        $error.addError("SEAMAN_PASSPORT_ERROR", new Error("SEAMAN_PASSPORT_SERIES_WRONG_FORMAT", "Seaman passport series wrong format")); 
+end
+
+rule "Check seaman passport number"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20006]/DocNumber)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=20006]/DocNumber")
+        $error : Errors( )
+    then 
+        $error.addError("SEAMAN_PASSPORT_ERROR", new Error("SEAMAN_PASSPORT_NUMBER_WRONG_FORMAT", "Seaman passport number wrong format")); 
+end
+
+rule "Check birth sertificate series"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20017]/DocSerie)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=20017]/DocSerie")
+        $error : Errors( )
+    then 
+        $error.addError("BIRTH_SERTIFICATE_ERROR", new Error("BIRTH_SERTIFICATE_SERIES_WRONG_FORMAT", "Birth sertificate series wrong format")); 
+end
+
+rule "Check birth sertificate number"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20017]/DocNumber)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=20017]/DocNumber")
+        $error : Errors( )
+    then 
+        $error.addError("BIRTH_SERTIFICATE_ERROR", new Error("BIRTH_SERTIFICATE_NUMBER_WRONG_FORMAT", "Birth sertificate number wrong format")); 
+end
+
+rule "Check international birth sertificate series"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20018]/DocSerie)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=20018]/DocSerie")
+        $error : Errors( )
+    then 
+        $error.addError("INTERNATIONAL_BIRTH_SERTIFICATE_ERROR", new Error("INTERNATIONAL_BIRTH_SERTIFICATE_SERIES_WRONG_FORMAT", "International birth sertificate series wrong format")); 
+end
+
+rule "Check international birth sertificate number"
+    when
+        XmlApplicationOk( )
+        $xml : XmlService( )
+        $trCount: String($xml.xpathNumber("count(//IdentityDocument[DocCode=20018]/DocNumber)") != 0  &&
+	        this not matches "(?U)^[\\p{Alnum}-]{0,20}$") from $xml.xpathString("//IdentityDocument[DocCode=20018]/DocNumber")
+        $error : Errors( )
+    then 
+        $error.addError("INTERNATIONAL_BIRTH_SERTIFICATE_ERROR", new Error("INTERNATIONAL_BIRTH_SERTIFICATE_NUMBER_WRONG_FORMAT", "International birth sertificate number wrong format")); 
+end
+
+
